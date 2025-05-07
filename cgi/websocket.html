@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      lang="en-US"
+      xml:lang="en-US">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="content-type"
+      content="text/html; charset=UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author"
+      content="Ta Minh Lam">
+<meta name="robots"
+      content="noindex">
+<meta name="googlebot"
+      content="noindex">
+<link rel="icon"
+      href="../assets/warai4.ico"
+      type="image/svg+xml">
+<link rel="stylesheet"
+      href="../assets/css/simple.min.css"
+      type="text/css"/>
+<script>
+function uuid() {
+  var id = "", i, random;
+  for (i = 0; i < 32; i++) {
+    random = Math.random() * 16 | 0;
+    if (i === 8 || i === 12 || i === 16 || i === 20) {
+      id += "-";
+    }
+    id += (i === 12 ? 4 : (i === 16 ? (random & 3 | 8) : random)).toString(16);
+  }
+  return id;
+}
+function setSocket() {
+  var id = uuid();
+  console.log(id);
+  var socket = new WebSocket("ws://"+ document.domain +":8000/websocket");
+  // var socket = new WebSocket("ws://127.0.0.1:8000/websocket");
+
+  socket.addEventListener("message", (event) => {
+    console.log("msg:", event.data);
+    try {
+      var m = JSON.parse(event.data); 
+    } catch (error) {
+      var m = {};
+    }
+    if (m['result']) {
+      document.querySelector("#response").innerHTML = m['result'];
+        
+      // const dt = document.createElement("dt");
+      // const dttxt = document.createTextNode(m["roll"]);
+      // const dd = document.createElement("dd");
+      // const ddtxt = document.createTextNode(m["result"]);
+      // dt.appendChild(dttxt);
+      // dd.appendChild(ddtxt);
+      // document.querySelector("#response").appendChild(dt);
+      // document.querySelector("#response").appendChild(dd);
+    }
+  });
+
+  // socket.onopen = function(event) {
+    // var msg = JSON.stringify({"id": id, "msg": "register", "to": "host", "path": window.location.pathname});
+    // socket.send(msg);
+    // var key = getParameterByName("key", location.href);
+    // socket.send(JSON.stringify({"msg": "checkLock", "id": id, "lvl": 1, "data": key, "to": "host"}));
+  // };
+  return socket;
+};
+
+document.addEventListener("DOMContentLoaded", function() {
+  var socket = setSocket();
+
+  body = document.querySelectorAll("body")[0];
+  body.addEventListener("click", function(e) {
+    target = e.target;
+    if (target.className == "button") {
+      val = document.querySelector("input").value
+      socket.send(val);
+    }
+  });
+})
+</script>
+<style>
+@font-face {
+    font-family: 'Dicier';
+    src:    url('../assets/fonts/dicier/Dicier-Round-Light.woff') format('woff'),
+            url('../assets/fonts/dicier/Dicier-Round-Light.otf') format('truetype'),
+    font-weight: normal;
+    font-style: normal;
+}
+article { font-family: 'Dicier';
+          font-size: 2em; 
+          text-align: center; }
+</style>
+<title>WS</title>
+</head>
+<body>
+<form>
+  <label>Command</label>
+  <input type="text" name="cmd">
+  <a class="button">Roll</a>
+</form>
+
+<article id="response"></article>
+
+<details>
+<summary>details</summary>
+<%= $url %>
+</details>
+</body>
+</html>
